@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+body {
+  background: linear-gradient(0deg, #141414 0%, #1F1D1D 100%);
+  position: relative;
+}
+
+.font-variant-numeric {
+  font-variant-numeric: lining-nums proportional-nums;
+}
+
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+
+  filter: invert(1);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
+}
