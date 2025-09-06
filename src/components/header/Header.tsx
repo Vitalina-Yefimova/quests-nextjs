@@ -8,12 +8,28 @@ import DropDownMenu from "@/components/header/components/DropDownMenu";
 import EscapeRoomIcon from "@/components/icons/EscapeRoomIcon";
 import Navigation from "@/components/header/components/Navigation";
 import PhoneNumber from "@/components/header/components/PhoneNumber";
-import type { User } from "@/actions/user";
+import type { User } from "@/utils/interfaces";
+import AuthPopup from "@/components/content/popups/AuthPopup";
+import { getCurrentUser } from "@/actions/user";
 
 export default function Header({ className = "" }: { className?: string }) {
   const [user, setUser] = useState<User | null>(null);
   const [openMenu, setOpenMenu] = useState(false);
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const result = await getCurrentUser();
+      if (result.success && result.user) {
+        setUser(result.user);
+      } else {
+        setUser(null);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -25,13 +41,14 @@ export default function Header({ className = "" }: { className?: string }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+
   return (
     <>
       <header
-        className={`flex justify-between pl-8 h-[74px] fixed top-0 left-0 w-full z-50 ${className}`}
+        className={`flex justify-between pl-8 h-[80px] fixed top-0 left-0 w-full z-50 ${className}`}
       >
         
-        <Link href="/" className="mt-6 cursor-none">
+        <Link href="/" className="mt-4 cursor-none">
           <CustomCursorWrapper>
             <EscapeRoomIcon />
           </CustomCursorWrapper>
@@ -39,10 +56,10 @@ export default function Header({ className = "" }: { className?: string }) {
 
               <Navigation />
 
-        <div className="flex items-center gap-6 pr-8">
+        <div className="flex gap-6 pr-8">
           <PhoneNumber />
 
-          <div className="flex items-center gap-3 font-bold pt-10">
+          <div className="flex items-center gap-3 font-bold pt-3">
             {user ? (
               <div className="relative" ref={menuRef}>
                 <CustomCursorWrapper>
@@ -55,12 +72,13 @@ export default function Header({ className = "" }: { className?: string }) {
                   </button>
                 </CustomCursorWrapper>
 
-                {openMenu && <DropDownMenu onClose={() => setOpenMenu(false)} />}
+                {openMenu && <DropDownMenu onClose={() => setOpenMenu(false)} onLogout={() => setUser(null)} />}
               </div>
             ) : (
               <CustomCursorWrapper>
                 <button
-                  className="text-white text-sm bg-[#F28A0F] transition px-5 py-2 rounded-md cursor-none"
+                  onClick={() => setShowAuthPopup(true)}
+                  className="text-white text-sm bg-[#F28A0F] transition px-5 py-2 rounded-md cursor-none inline-flex items-center"
                 >
                   <UserIcon size={18} className="inline mr-2" />
                   Log in
@@ -70,6 +88,24 @@ export default function Header({ className = "" }: { className?: string }) {
           </div>
         </div>
       </header>
+      
+      {showAuthPopup && (
+        <AuthPopup 
+          onClose={() => setShowAuthPopup(false)} 
+          onLoginSuccess={() => {
+            setShowAuthPopup(false);
+            const checkAuth = async () => {
+              const result = await getCurrentUser();
+              if (result.success && result.user) {
+                setUser(result.user);
+              } else {
+                setUser(null);
+              }
+            };
+            checkAuth();
+          }}
+        />
+      )}
     </>
   );
 }

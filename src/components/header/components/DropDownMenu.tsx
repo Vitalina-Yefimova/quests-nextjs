@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { logout } from "@/utils/auth";
+import { logout } from "@/actions/auth";
 
-export default function DropDownMenu({ onClose }: { onClose: () => void }) {
-  const router = useRouter();
+export default function DropDownMenu({ onClose, onLogout }: { onClose: () => void; onLogout?: () => void }) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const isNavigating = useRef(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -18,11 +17,14 @@ export default function DropDownMenu({ onClose }: { onClose: () => void }) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [onClose]);
+  }, []);
 
   const goTo = (path: string) => {
-    router.push(path);
+    if (isNavigating.current) return;
+    
+    isNavigating.current = true;
     onClose();
+    window.location.href = path;
   };
  return (
     <div
@@ -30,15 +32,22 @@ export default function DropDownMenu({ onClose }: { onClose: () => void }) {
       className="absolute right-0 mt-2 bg-white text-black rounded-md shadow-md w-36 z-50"
     >
       <button
-        onClick={() => goTo("/profile")}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          goTo("/profile");
+        }}
         className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
       >
         My Profile
       </button>
       <button
-        onClick={async () => {
+        onClick={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           await logout();
           onClose();
+          onLogout?.();
         }}
         className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
       >

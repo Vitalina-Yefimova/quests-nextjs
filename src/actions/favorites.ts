@@ -1,11 +1,10 @@
 'use server';
 
-import { cookies } from 'next/headers';
+import { getAuthToken } from '@/utils/auth';
 
 export const addFavorite = async (questId: string) => {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
+    const token = await getAuthToken();
 
     if (!token) {
       throw new Error('No authentication token');
@@ -32,8 +31,7 @@ export const addFavorite = async (questId: string) => {
 
 export const removeFavorite = async (questId: string) => {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
+    const token = await getAuthToken();
 
     if (!token) {
       throw new Error('No authentication token');
@@ -59,8 +57,7 @@ export const removeFavorite = async (questId: string) => {
 
 export const getUserFavorites = async () => {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
+    const token = await getAuthToken();
 
     if (!token) {
       throw new Error('No authentication token');

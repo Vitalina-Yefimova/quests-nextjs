@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   addFavorite,
   removeFavorite,
@@ -9,7 +9,7 @@ import {
 import StarIcon from "@/components/icons/StarIcon";
 import StarOutlineIcon from "@/components/icons/StarOutlineIcon";
 import CustomCursorWrapper from "@/components/generics/customCursor/CustomCursorWrapper";
-import type { User } from "@/actions/user";
+import type { User } from "@/utils/interfaces";
 
 interface FavoritesToggleProps {
   questId: string | number;
@@ -28,33 +28,31 @@ export default function FavoritesToggle({
 }: FavoritesToggleProps) {
   const [isFavorite, setIsFavorite] = useState(false);
 
-  useEffect(() => {
+  const checkFavorite = async () => {
     if (user && questId) {
-      getUserFavorites().then((favorites: any[]) => {
-        const exists = favorites.some(
-          (favorite) => favorite.questId === questId.toString()
-        );
-        setIsFavorite(exists);
-      }).catch((error) => {
-        console.error('Error fetching favorites:', error);
-      });
+      const favorites = await getUserFavorites();
+      const exists = favorites.some(
+        (favorite: { questId: string }) => favorite.questId === questId.toString()
+      );
+      setIsFavorite(exists);
     }
+  };
+
+  useEffect(() => {
+    checkFavorite();
   }, [user, questId]);
 
   const toggleFavorite = async () => {
     if (!user) return;
-    try {
-      if (isFavorite) {
-        await removeFavorite(questId.toString());
-        setIsFavorite(false);
-        onChange?.(false);
-      } else {
-        await addFavorite(questId.toString());
-        setIsFavorite(true);
-        onChange?.(true);
-      }
-    } catch (err) {
-      console.error("Favorite error:", err);
+    
+    if (isFavorite) {
+      await removeFavorite(questId.toString());
+      setIsFavorite(false);
+      onChange?.(false);
+    } else {
+      await addFavorite(questId.toString());
+      setIsFavorite(true);
+      onChange?.(true);
     }
   };
 

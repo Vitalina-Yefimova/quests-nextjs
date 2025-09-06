@@ -7,8 +7,8 @@ import PuzzleIcon from "@/components/icons/PuzzleIcon";
 import CustomCursorWrapper from "@/components/generics/customCursor/CustomCursorWrapper";
 import DividerVector from "@/components/generics/divider/DividerVector";
 import FavoritesToggle from "@/components/generics/favorites/FavoritesToggle";
-import type { Quest } from "@/actions/quests";
-import type { User } from "@/actions/user";
+import type { Quest } from "@/utils/interfaces";
+import type { User } from "@/utils/interfaces";
 
 interface QuestBlockProps {
   quest: Quest;
@@ -17,18 +17,17 @@ interface QuestBlockProps {
 }
 
 export default function QuestBlock({ quest, user, onFavoriteChange }: QuestBlockProps) {
-
   return (
     <div className="relative group">
-      <Link href="/" className="relative group">
+      <Link href={`/quest/${quest.id}`} className="relative group">
         <CustomCursorWrapper>
           <div className="relative w-full">
             <Image
               src={quest.image}
               alt={quest.title}
-              fill
-              sizes="(max-width: 1024px) 100vw, 33vw"
-              className="object-cover select-none"
+              width={400}
+              height={300}
+              className="w-full h-auto object-cover select-none"
             />
             <div className="absolute bottom-0 left-0 w-full p-5 z-10">
               <h3 className="text-white text-2xl font-bold leading-[120%] font-variant-numeric pb-[15px]">
