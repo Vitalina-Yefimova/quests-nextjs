@@ -18,7 +18,7 @@ export const setAuthToken = async (token: string): Promise<void> => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24,
     });
   } catch (error) {
     console.error('Error setting access token:', error);

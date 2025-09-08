@@ -1,5 +1,3 @@
-'use client';
-
 import ResetPasswordPopup from '@/components/content/popups/ResetPasswordPopup';
 
 export default function ResetPasswordPage() {

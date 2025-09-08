@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getUserFavorites } from '@/actions/favorites';
 import { getAllQuests } from '@/actions/quests';
-import { getCurrentUser } from '@/actions/user';
+import { getUser } from '@/actions/user';
 import QuestBlock from '@/components/content/QuestBlock';
 import { Quest, User } from '@/utils/interfaces';
 
@@ -16,32 +16,22 @@ export default function FavoritesSection() {
   const [allQuests, setAllQuests] = useState<Quest[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
-    try {
-      const [favorites, quests, userResult] = await Promise.all([
-        getUserFavorites(),
-        getAllQuests(),
-        getCurrentUser()
-      ]);
-      
-      const ids: string[] = favorites.map(
-        (favorite: Favorite) => favorite.questId
-      );
-      setFavoriteIds(ids);
-      setAllQuests(quests);
-      
-      if (userResult.success && userResult.user) {
-        setUser(userResult.user);
-      }
-    } catch (err) {
-      setError('Failed to load favorites');
-      console.error('Error loading favorites:', err);
-    } finally {
-      setLoading(false);
-    }
+    const [favorites, quests, user] = await Promise.all([
+      getUserFavorites(),
+      getAllQuests(),
+      getUser()
+    ]);
+    
+    const ids: string[] = favorites.map(
+      (favorite: Favorite) => favorite.questId
+    );
+    setFavoriteIds(ids);
+    setAllQuests(quests);
+    setUser(user);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -61,9 +51,6 @@ export default function FavoritesSection() {
     );
   }
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
 
   if (favoriteQuests.length === 0) {
     return (

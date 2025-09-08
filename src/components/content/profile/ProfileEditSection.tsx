@@ -5,7 +5,7 @@ import BaseForm from "@/components/generics/forms/BaseForm";
 import { User } from "@/utils/interfaces";
 import { updateUser } from "@/actions/user";
 import { sendEmailVerification } from "@/actions/auth";
-import { authSchema, type AuthFormValues } from "@/components/content/forms/schemas/authSchema";
+import { profileEditSchema, type ProfileEditFormValues } from "./schemas/profileSchemas";
 
 interface ProfileEditSectionProps {
   user: User;
@@ -18,7 +18,7 @@ export default function ProfileEditSection({ user, onUserUpdate }: ProfileEditSe
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emailSent, setEmailSent] = useState(false);
 
-  const handleSubmit = async (data: AuthFormValues) => {
+  const handleSubmit = async (data: ProfileEditFormValues) => {
     const payload: any = { ...data };
     
     if (data.email && data.email !== user.email) {
@@ -26,7 +26,7 @@ export default function ProfileEditSection({ user, onUserUpdate }: ProfileEditSe
       delete payload.email;
     }
 
-    const result = await updateUser(user.id, payload);
+    const result = await updateUser(payload);
 
     if (!result.success) {
       if (result.error?.includes("already")) {
@@ -82,7 +82,7 @@ export default function ProfileEditSection({ user, onUserUpdate }: ProfileEditSe
     <>
       <BaseForm
         fields={fields}
-        schema={authSchema}
+        schema={profileEditSchema}
         submitText="Save Changes"
         onSubmit={handleSubmit}
         defaultValues={{

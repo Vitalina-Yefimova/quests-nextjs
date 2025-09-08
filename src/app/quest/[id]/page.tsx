@@ -1,17 +1,11 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { getQuestById } from '@/actions/quests';
-import { getCurrentUser } from '@/actions/user';
+import { getUser } from '@/actions/user';
 import PageTitle from '@/components/generics/title/PageTitle';
 import ClockIcon from '@/components/icons/ClockIcon';
 import PersonIcon from '@/components/icons/PersonIcon';
 import PuzzleIcon from '@/components/icons/PuzzleIcon';
 import DividerVector from '@/components/generics/divider/DividerVector';
 import FavoritesToggle from '@/components/generics/favorites/FavoritesToggle';
-import Header from '@/components/header/Header';
-import type { Quest } from '@/utils/interfaces';
-import type { User } from '@/utils/interfaces';
 
 interface QuestPageProps {
   params: Promise<{
@@ -19,40 +13,19 @@ interface QuestPageProps {
   }>;
 }
 
-export default function QuestPage({ params }: QuestPageProps) {
-  const [quest, setQuest] = useState<Quest | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export default async function QuestPage({ params }: QuestPageProps) {
+  const { id } = await params;
+  
+  const [quest, user] = await Promise.all([
+    getQuestById(id),
+    getUser()
+  ]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const { id } = await params;
-        const [questData, userResult] = await Promise.all([
-          getQuestById(id),
-          getCurrentUser()
-        ]);
-        
-        setQuest(questData);
-        if (userResult.success && userResult.user) {
-          setUser(userResult.user);
-        }
-      } catch (error) {
-        console.error('Error loading quest data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [params]);
-
-  if (isLoading || !quest) {
+  if (!quest) {
     return (
       <div className="min-h-screen bg-[#1E1E1E] text-white">
-        <Header />
         <div className="flex justify-center items-center min-h-[400px] pt-20">
-          <div className="text-xl">Loading...</div>
+          <div className="text-xl">Quest not found</div>
         </div>
       </div>
     );
@@ -60,7 +33,6 @@ export default function QuestPage({ params }: QuestPageProps) {
   
   return (
     <div className="min-h-screen bg-[#1E1E1E] text-white">
-      <Header />
       
       <div
         className="relative bg-no-repeat bg-cover bg-center min-h-screen"

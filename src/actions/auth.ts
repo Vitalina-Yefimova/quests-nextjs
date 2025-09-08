@@ -1,16 +1,15 @@
 'use server';
 
 import { setAuthToken, removeAuthToken, getAuthToken } from '@/utils/auth';
-import { authSchema } from '@/components/content/forms/schemas/authSchema';
-import { z } from 'zod';
+import { signInSchema, signUpSchema, phoneAuthSchema, codeVerificationSchema, type SignInFormValues, type SignUpFormValues, type PhoneAuthFormValues, type CodeVerificationFormValues } from '@/components/content/forms/schemas/authSchemas';
 
 export const emailAuth = async (
-  data: z.infer<typeof authSchema>,
+  data: SignInFormValues | SignUpFormValues,
   authType: 'login' | 'register'
 ) => {
   try {
     if (authType === 'login') {
-      const validatedData = authSchema.parse(data);
+      const validatedData = signInSchema.parse(data);
 
       const response = await fetch(`${process.env.API_BASE_URL}/auth/sign-in`, {
         method: 'POST',
@@ -27,7 +26,7 @@ export const emailAuth = async (
       await setAuthToken(access_token);
       return { success: true };
     } else {
-      const validatedData = authSchema.parse(data);
+      const validatedData = signUpSchema.parse(data);
 
       const payload = {
         firstName: validatedData.firstName,
@@ -61,10 +60,9 @@ export const emailAuth = async (
 
 export const verifyEmail = async (token: string) => {
   try {
-    const response = await fetch(`${process.env.API_BASE_URL}/auth/verify`, {
-      method: 'POST',
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/verify?token=${token}`, {
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
     });
 
     if (!response.ok) {
@@ -91,13 +89,13 @@ export const logout = async (): Promise<void> => {
 };
 
 export const phoneAuth = async (
-  data: z.infer<typeof authSchema>,
+  data: PhoneAuthFormValues | CodeVerificationFormValues,
   step: 'phone' | 'code',
   phone?: string
 ) => {
   try {
     if (step === 'phone') {
-      const validatedData = authSchema.parse(data);
+      const validatedData = phoneAuthSchema.parse(data);
 
       const response = await fetch(`${process.env.API_BASE_URL}/auth/send-otp`, {
         method: 'POST',
@@ -112,7 +110,7 @@ export const phoneAuth = async (
 
       return { success: true };
     } else {
-      const validatedCode = authSchema.parse(data);
+      const validatedCode = codeVerificationSchema.parse(data);
 
       if (!phone) {
         throw new Error('Phone number is required');

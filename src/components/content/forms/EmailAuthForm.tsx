@@ -1,12 +1,11 @@
 'use client';
 
-import { z } from "zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import BaseForm from '@/components/generics/forms/BaseForm';
 import ForgotPasswordPopup from '@/components/content/popups/ForgotPasswordPopup';
 import { emailAuth } from '@/actions/auth';
-import { authSchema } from './schemas/authSchema';
+import { signInSchema, signUpSchema, type SignInFormValues, type SignUpFormValues } from './schemas/authSchemas';
 
 
 export default function EmailAuthForm({
@@ -19,9 +18,7 @@ export default function EmailAuthForm({
   const router = useRouter();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-    const handleSubmit = async (
-      data: z.infer<typeof authSchema>
-    ) => {
+  const handleSubmit = async (data: SignInFormValues | SignUpFormValues) => {
       const result = await emailAuth(data, authType);
     
     if (!result.success) {
@@ -31,23 +28,21 @@ export default function EmailAuthForm({
     if (authType === "login") {
       onSuccess();
     } else {
-      const registerData = data as z.infer<typeof authSchema>;
-      router.push(`/check-email?email=${encodeURIComponent(registerData.email || '')}`);
+      const registerData = data as SignUpFormValues;
+      router.push(`/check-email?email=${encodeURIComponent(registerData.email)}`);
       onSuccess();
     }
   };
 
-  const schema = authType === "login" ? authSchema : authSchema;
+  const schema = authType === "login" ? signInSchema : signUpSchema;
 
   const fields =
     authType === "login"
       ? [
-          { name: "type", label: "Type", type: "hidden", defaultValue: "login" },
           { name: "email", label: "Email" },
           { name: "password", label: "Password", type: "password" },
         ]
       : [
-          { name: "type", label: "Type", type: "hidden", defaultValue: "register" },
           { name: "firstName", label: "First Name" },
           { name: "lastName", label: "Last Name" },
           { name: "email", label: "Email" },
@@ -67,7 +62,7 @@ export default function EmailAuthForm({
         submitText={authType === "login" ? "Login" : "Sign Up"}
         onSubmit={handleSubmit}
         fields={fields}
-        defaultValues={{ type: authType }}
+        defaultValues={{}}
       />
       {authType === "login" && (
         <div className="pt-3 text-center font-semibold">

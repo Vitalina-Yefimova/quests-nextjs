@@ -25,9 +25,7 @@ export default function ChangePasswordSection({ user }: ChangePasswordSectionPro
   const [isSuccess, setSuccess] = useState(false);
 
   const handleSubmit = async (data: z.infer<typeof schema>) => {
-    if (!user || !user.id) throw new Error("User is not authenticated");
-
-    const result = await changePassword(user.id, {
+    const result = await changePassword({
       oldPassword: data.oldPassword,
       newPassword: data.newPassword,
     });

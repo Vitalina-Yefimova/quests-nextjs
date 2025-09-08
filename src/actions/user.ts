@@ -2,16 +2,17 @@
 
 import { User } from '@/utils/interfaces';
 import { getAuthToken } from '@/utils/auth';
+import { profileEditSchema, changePasswordSchema, type ProfileEditFormValues, type ChangePasswordFormValues } from '@/components/content/profile/schemas/profileSchemas';
 
-export const getUser = async (id: string): Promise<User> => {
+export const getUser = async (): Promise<User | null> => {
   try {
     const token = await getAuthToken();
 
     if (!token) {
-      throw new Error('No authentication token');
+      return null;
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/users/${id}`, {
+    const response = await fetch(`${process.env.API_BASE_URL}/users`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -19,20 +20,20 @@ export const getUser = async (id: string): Promise<User> => {
       },
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      return null;
     }
     return response.json();
   } catch (error) {
     console.error('Error in getUser:', error);
-    throw error;
+    return null;
   }
 };
 
 export const updateUser = async (
-  id: string,
-  userData: Partial<Pick<User, 'firstName' | 'lastName' | 'phone' | 'email'> & { oldPassword?: string; password?: string; newEmail?: string }>
+  userData: ProfileEditFormValues & { oldPassword?: string; password?: string; newEmail?: string }
 ) => {
   try {
+    const validatedData = profileEditSchema.parse(userData);
     const token = await getAuthToken();
 
     if (!token) {
@@ -44,10 +45,10 @@ export const updateUser = async (
       'Authorization': `Bearer ${token}`,
     };
 
-    const response = await fetch(`${process.env.API_BASE_URL}/users/${id}`, {
+    const response = await fetch(`${process.env.API_BASE_URL}/users`, {
       method: 'PATCH',
       headers,
-      body: JSON.stringify(userData),
+      body: JSON.stringify(validatedData),
       cache: 'no-store',
     });
 
@@ -67,48 +68,40 @@ export const updateUser = async (
   }
 };
 
-
-export const changePassword = async (userId: string, data: {
-  oldPassword: string;
-  newPassword: string;
-}) => {
-  const result = await updateUser(userId, {
-    password: data.newPassword,
-    oldPassword: data.oldPassword,
-  });
-
-  if (result.success) {
-    return { success: true };
-  } else {
-    return { success: false, error: result.error };
-  }
-};
-
-export const getCurrentUser = async () => {
+export const changePassword = async (data: ChangePasswordFormValues) => {
   try {
+    const validatedData = changePasswordSchema.parse(data);
     const token = await getAuthToken();
 
     if (!token) {
       return { success: false, error: 'No authentication token' };
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/users/profile`, {
+    const response = await fetch(`${process.env.API_BASE_URL}/users`, {
+      method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
+      body: JSON.stringify({
+        password: validatedData.newPassword,
+        oldPassword: validatedData.oldPassword,
+      }),
+      cache: 'no-store',
     });
 
     if (!response.ok) {
-      return { success: false, error: 'Failed to get user data' };
+      const error = await response.json();
+      return { success: false, error: error.message || `HTTP error! status: ${response.status}` };
     }
 
-    const userData = await response.json();
-    return { success: true, user: userData };
+    return { success: true };
   } catch (error) {
+    console.error('Error in changePassword:', error);
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
     return { success: false, error: 'Internal server error' };
   }
 };
+

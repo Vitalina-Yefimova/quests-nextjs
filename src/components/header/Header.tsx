@@ -10,7 +10,7 @@ import Navigation from "@/components/header/components/Navigation";
 import PhoneNumber from "@/components/header/components/PhoneNumber";
 import type { User } from "@/utils/interfaces";
 import AuthPopup from "@/components/content/popups/AuthPopup";
-import { getCurrentUser } from "@/actions/user";
+import { getUser } from "@/actions/user";
 
 export default function Header({ className = "" }: { className?: string }) {
   const [user, setUser] = useState<User | null>(null);
@@ -20,12 +20,8 @@ export default function Header({ className = "" }: { className?: string }) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const result = await getCurrentUser();
-      if (result.success && result.user) {
-        setUser(result.user);
-      } else {
-        setUser(null);
-      }
+      const user = await getUser();
+      setUser(user);
     };
 
     checkAuth();
@@ -95,12 +91,8 @@ export default function Header({ className = "" }: { className?: string }) {
           onLoginSuccess={() => {
             setShowAuthPopup(false);
             const checkAuth = async () => {
-              const result = await getCurrentUser();
-              if (result.success && result.user) {
-                setUser(result.user);
-              } else {
-                setUser(null);
-              }
+              const user = await getUser();
+              setUser(user);
             };
             checkAuth();
           }}

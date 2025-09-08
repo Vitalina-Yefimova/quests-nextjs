@@ -1,18 +1,28 @@
 'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import EmailAuthForm from "@/components/content/forms/EmailAuthForm";
 import PhoneAuthForm from "@/components/content/forms/PhoneAuthForm";
 
-export default function AuthPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ type?: string; method?: string }>;
-}) {
+export default function AuthPage() {
   const [authType, setAuthType] = useState<"login" | "register">("login");
   const [method, setMethod] = useState<"email" | "phone">("email");
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  useEffect(() => {
+    const type = searchParams.get('type');
+    const methodParam = searchParams.get('method');
+    
+    if (type === 'register') {
+      setAuthType('register');
+    }
+    
+    if (methodParam === 'phone') {
+      setMethod('phone');
+    }
+  }, [searchParams]);
 
   const handleSuccess = () => {
     if (authType === "login" || method === "phone") {

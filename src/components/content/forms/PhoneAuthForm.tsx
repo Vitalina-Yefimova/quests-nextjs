@@ -1,9 +1,8 @@
 'use client';
 
-import { z } from "zod";
 import { useState } from "react";
 import { phoneAuth } from '@/actions/auth';
-import { authSchema } from './schemas/authSchema';
+import { phoneAuthSchema, codeVerificationSchema, type PhoneAuthFormValues, type CodeVerificationFormValues } from './schemas/authSchemas';
 import BaseForm from '@/components/generics/forms/BaseForm';
 
 export default function PhoneAuthForm({
@@ -14,17 +13,17 @@ export default function PhoneAuthForm({
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [phone, setPhone] = useState("");
 
-  const handleSendOtp = async (data: z.infer<typeof authSchema>) => {
+  const handleSendOtp = async (data: PhoneAuthFormValues) => {
     const result = await phoneAuth(data, 'phone', data.phone);
     if (result.success) {
-      setPhone(data.phone!);
+      setPhone(data.phone);
       setStep("code");
     } else {
       throw new Error(result.error || "Failed to send code");
     }
   };
 
-  const handleVerifyCode = async (data: z.infer<typeof authSchema>) => {
+  const handleVerifyCode = async (data: CodeVerificationFormValues) => {
     const result = await phoneAuth(data, 'code', phone);
     if (result.success) {
       onSuccess();
@@ -35,7 +34,6 @@ export default function PhoneAuthForm({
 
   if (step === "phone") {
     const phoneFields = [
-      { name: "type", label: "Type", type: "hidden", defaultValue: "phone" },
       { name: "phone", label: "Phone Number", type: "tel" },
     ];
 
@@ -43,18 +41,16 @@ export default function PhoneAuthForm({
       <div className="space-y-4">
         <BaseForm
           fields={phoneFields}
-          schema={authSchema}
+          schema={phoneAuthSchema}
           submitText="Send Code"
           onSubmit={handleSendOtp}
-          defaultValues={{ type: "phone" }}
+          defaultValues={{}}
         />
       </div>
     );
   }
 
   const codeFields = [
-    { name: "type", label: "Type", type: "hidden", defaultValue: "code" },
-    { name: "phone", label: "Phone", type: "hidden", defaultValue: phone },
     { name: "code", label: "Enter Code", type: "text", max: 6 },
   ];
 
@@ -65,10 +61,10 @@ export default function PhoneAuthForm({
       
       <BaseForm
         fields={codeFields}
-        schema={authSchema}
+        schema={codeVerificationSchema}
         submitText="Verify Code"
         onSubmit={handleVerifyCode}
-        defaultValues={{ type: "code", phone: phone }}
+        defaultValues={{}}
         showTermsCheckbox={false}
       />
 
