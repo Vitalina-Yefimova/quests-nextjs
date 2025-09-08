@@ -5,7 +5,7 @@ export const profileEditSchema = z.object({
   firstName: nameValidation,
   lastName: nameValidation,
   phone: phoneValidation,
-  email: emailValidation,
+  email: emailValidation.optional(),
 });
 
 export const changePasswordSchema = z.object({

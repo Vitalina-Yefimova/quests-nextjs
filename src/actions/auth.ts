@@ -188,7 +188,6 @@ export const resetPassword = async (token: string, password: string) => {
   }
 };
 
-
 export const sendEmailVerification = async (newEmail: string) => {
   try {
     const token = await getAuthToken();
@@ -204,13 +203,37 @@ export const sendEmailVerification = async (newEmail: string) => {
       },
       body: JSON.stringify({
         newEmail,
-        frontendUrl: `${process.env.NEXT_PUBLIC_APP_URL}`,
+        frontendUrl: process.env.NEXT_PUBLIC_APP_URL,
       }),
     });
 
     if (!response.ok) {
       const error = await response.json();
       return { success: false, error: error.message || 'Failed to send verification email' };
+    }
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Internal server error' };
+  }
+};
+
+export const verifyNewEmail = async (token: string) => {
+  try {
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/verify-new-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      return { success: false, error: error.message || 'Failed to verify email' };
     }
 
     return { success: true };

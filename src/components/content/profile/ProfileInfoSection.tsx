@@ -20,9 +20,6 @@ export default function ProfileInfoSection({ user }: ProfileInfoSectionProps) {
       </p>
       <p>
         <strong>Email:</strong> {user.email || "—"}
-        {user.emailVerified && (
-          <span className="text-green-400 text-sm ml-2">✓ Verified</span>
-        )}
       </p>
     </div>
   );

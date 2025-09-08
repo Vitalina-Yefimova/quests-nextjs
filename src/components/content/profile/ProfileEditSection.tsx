@@ -19,11 +19,14 @@ export default function ProfileEditSection({ user, onUserUpdate }: ProfileEditSe
   const [emailSent, setEmailSent] = useState(false);
 
   const handleSubmit = async (data: ProfileEditFormValues) => {
-    const payload: any = { ...data };
-    
+    const payload: any = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+    };
+
     if (data.email && data.email !== user.email) {
       payload.newEmail = data.email;
-      delete payload.email;
     }
 
     const result = await updateUser(payload);
@@ -43,11 +46,16 @@ export default function ProfileEditSection({ user, onUserUpdate }: ProfileEditSe
   };
 
   const sendVerification = async () => {
+    if (!user.newEmail) {
+      setEmailError("No email to verify");
+      return;
+    }
+
     setVerifying(true);
     setEmailError(null);
     setEmailSent(false);
 
-    const result = await sendEmailVerification(user.newEmail || user.email || '');
+    const result = await sendEmailVerification(user.newEmail);
 
     if (!result.success) {
       setEmailError(result.error || "Failed to send verification email");
@@ -58,7 +66,10 @@ export default function ProfileEditSection({ user, onUserUpdate }: ProfileEditSe
     setVerifying(false);
   };
 
-  const showVerifyButton = !!(user?.newEmail && !user?.emailVerified);
+  const showVerifyButton =
+    !!user?.newEmail &&
+    user?.emailVerified === false &&
+    (!user?.email || user?.email !== user?.newEmail);
 
   const fields = [
     { name: "firstName", label: "First Name" },
@@ -71,7 +82,7 @@ export default function ProfileEditSection({ user, onUserUpdate }: ProfileEditSe
     {
       name: "email",
       label: "Email",
-      disabled: user.emailVerified && !user.newEmail,
+      disabled: user.emailVerified === true && !user.newEmail,
       showVerifyButton,
       onVerifyClick: sendVerification,
       isVerifying,
@@ -104,6 +115,7 @@ export default function ProfileEditSection({ user, onUserUpdate }: ProfileEditSe
           Verification email sent! Please check your inbox.
         </p>
       )}
+
     </>
   );
 }

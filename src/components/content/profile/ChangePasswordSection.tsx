@@ -2,20 +2,9 @@
 
 import { useState } from "react";
 import BaseForm from "@/components/generics/forms/BaseForm";
-import { z } from "zod";
 import { User } from "@/utils/interfaces";
 import { changePassword } from "@/actions/user";
-
-const schema = z
-  .object({
-    oldPassword: z.string().min(6, "Old password is required"),
-    newPassword: z.string().min(6, "New password is required"),
-    confirmPassword: z.string().min(6, "Confirm your new password"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+import { changePasswordSchema, type ChangePasswordFormValues } from "./schemas/profileSchemas";
 
 interface ChangePasswordSectionProps {
   user: User;
@@ -24,11 +13,8 @@ interface ChangePasswordSectionProps {
 export default function ChangePasswordSection({ user }: ChangePasswordSectionProps) {
   const [isSuccess, setSuccess] = useState(false);
 
-  const handleSubmit = async (data: z.infer<typeof schema>) => {
-    const result = await changePassword({
-      oldPassword: data.oldPassword,
-      newPassword: data.newPassword,
-    });
+  const handleSubmit = async (data: ChangePasswordFormValues) => {
+    const result = await changePassword(data);
 
     if (!result.success) {
       throw new Error(result.error || "Failed to change password");
@@ -46,7 +32,7 @@ export default function ChangePasswordSection({ user }: ChangePasswordSectionPro
   return (
     <BaseForm
       fields={fields}
-      schema={schema}
+      schema={changePasswordSchema}
       submitText="Change Password"
       onSubmit={handleSubmit}
       isSuccess={isSuccess}

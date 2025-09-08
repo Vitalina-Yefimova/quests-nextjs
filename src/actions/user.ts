@@ -33,7 +33,19 @@ export const updateUser = async (
   userData: ProfileEditFormValues & { oldPassword?: string; password?: string; newEmail?: string }
 ) => {
   try {
-    const validatedData = profileEditSchema.parse(userData);
+    const profileData: any = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      phone: userData.phone,
+    };
+
+    if (userData.newEmail) {
+      profileData.email = userData.newEmail;
+    } else if (userData.email) {
+      profileData.email = userData.email;
+    }
+
+    const validatedData = profileEditSchema.parse(profileData);
     const token = await getAuthToken();
 
     if (!token) {
@@ -48,7 +60,7 @@ export const updateUser = async (
     const response = await fetch(`${process.env.API_BASE_URL}/users`, {
       method: 'PATCH',
       headers,
-      body: JSON.stringify(validatedData),
+      body: JSON.stringify(userData),
       cache: 'no-store',
     });
 
