@@ -20,11 +20,21 @@ export const addFavorite = async (questId: string) => {
       cache: 'no-store',
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
-    return response.json();
+
+    const text = await response.text();
+    if (!text) {
+      return { success: true };
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: true };
+    }
   } catch (error) {
-    console.error('Error in addFavorite:', error);
     throw error;
   }
 };
@@ -48,9 +58,18 @@ export const removeFavorite = async (questId: string) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return response.json();
+
+    const text = await response.text();
+    if (!text) {
+      return { success: true };
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: true };
+    }
   } catch (error) {
-    console.error('Error in removeFavorite:', error);
     throw error;
   }
 };
@@ -73,9 +92,18 @@ export const getUserFavorites = async () => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return response.json();
+
+    const text = await response.text();
+    if (!text) {
+      return [];
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return [];
+    }
   } catch (error) {
-    console.error('Error in getUserFavorites:', error);
     throw error;
   }
 };

@@ -17,10 +17,13 @@ export default function CustomCursorWrapper({
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = cursorRef.current?.getBoundingClientRect();
     if (!rect) return;
-    setCursorPosition({
+    
+    const newPosition = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
-    });
+    };
+    
+    setCursorPosition(newPosition);
   };
 
   return (
@@ -33,7 +36,7 @@ export default function CustomCursorWrapper({
     >
       {isCursorVisible && (
         <div
-          className="absolute pointer-events-none transition-transform duration-75 z-50"
+          className="absolute pointer-events-none z-50"
           style={{
             left: cursorPosition.x,
             top: cursorPosition.y,

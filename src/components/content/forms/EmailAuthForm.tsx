@@ -25,13 +25,7 @@ export default function EmailAuthForm({
       throw new Error(result.error || 'Authentication failed');
     }
 
-    if (authType === "login") {
-      onSuccess();
-    } else {
-      const registerData = data as SignUpFormValues;
-      router.push(`/check-email?email=${encodeURIComponent(registerData.email)}`);
-      onSuccess();
-    }
+    onSuccess();
   };
 
   const schema = authType === "login" ? signInSchema : signUpSchema;

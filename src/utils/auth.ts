@@ -6,7 +6,6 @@ export const getAuthToken = async (): Promise<string | null> => {
     const cookieStore = await cookies();
     return cookieStore.get(COOKIE_NAMES.ACCESS_TOKEN)?.value || null;
   } catch (error) {
-    console.error('Error getting access token:', error);
     return null;
   }
 };
@@ -21,7 +20,6 @@ export const setAuthToken = async (token: string): Promise<void> => {
       maxAge: 60 * 60 * 24,
     });
   } catch (error) {
-    console.error('Error setting access token:', error);
   }
 };
 
@@ -30,6 +28,5 @@ export const removeAuthToken = async (): Promise<void> => {
     const cookieStore = await cookies();
     cookieStore.delete(COOKIE_NAMES.ACCESS_TOKEN);
   } catch (error) {
-    console.error('Error removing access token:', error);
   }
 };

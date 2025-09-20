@@ -23,9 +23,7 @@ export default async function VerifyNewEmailPage({
     );
   }
 
-  console.log('Token from URL:', token);
   const result = await verifyNewEmail(token);
-  console.log('Verification result:', result);
   
   if (result.success) {
     return (

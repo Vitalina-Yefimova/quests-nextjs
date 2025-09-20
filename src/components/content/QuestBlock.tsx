@@ -30,7 +30,7 @@ export default function QuestBlock({ quest, user, onFavoriteChange }: QuestBlock
               className="w-full h-auto object-cover select-none"
             />
             <div className="absolute bottom-0 left-0 w-full p-5 z-10">
-              <h3 className="text-white text-2xl font-bold leading-[120%] font-variant-numeric pb-[15px]">
+              <h3 className="text-white text-lg font-bold leading-[120%] font-variant-numeric pb-[15px] break-words line-clamp-2">
                 {quest.title}
               </h3>
               <div className="flex gap-3">
@@ -55,10 +55,7 @@ export default function QuestBlock({ quest, user, onFavoriteChange }: QuestBlock
         </CustomCursorWrapper>
       </Link>
       {user && (
-        <div
-          className="absolute top-3 right-3 z-20"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="absolute top-3 right-3 z-20">
           <FavoritesToggle
             questId={quest.id.toString()}
             user={user}

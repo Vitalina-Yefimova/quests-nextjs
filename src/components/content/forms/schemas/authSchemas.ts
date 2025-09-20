@@ -28,7 +28,7 @@ export const phoneAuthSchema = z.object({
 });
 
 export const codeVerificationSchema = z.object({
-  code: z.string().length(6, "Code must be 6 digits"),
+  code: z.number().min(6, "Code must be 6 digits"),
 });
 
 export type SignInFormValues = z.infer<typeof signInSchema>;

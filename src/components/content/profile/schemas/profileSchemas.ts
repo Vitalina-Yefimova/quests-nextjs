@@ -11,7 +11,7 @@ export const profileEditSchema = z.object({
 export const changePasswordSchema = z.object({
   oldPassword: passwordValidation,
   newPassword: passwordValidation,
-  confirmPassword: passwordValidation,
+  confirmPassword: z.string(),
 }).refine(
   (data) => data.newPassword === data.confirmPassword,
   {

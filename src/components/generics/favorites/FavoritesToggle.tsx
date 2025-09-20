@@ -66,7 +66,7 @@ export default function FavoritesToggle({
           e.stopPropagation();
           toggleFavorite();
         }}
-        className={`transition cursor-none ${className}`}
+        className={`transition cursor-none p-2 min-w-[40px] min-h-[40px] flex items-center justify-center ${className}`}
       >
         {iconOnly ? (
           isFavorite ? (

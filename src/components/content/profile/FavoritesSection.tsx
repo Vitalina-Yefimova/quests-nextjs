@@ -67,10 +67,10 @@ export default function FavoritesSection() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+    <div className="pt-8">
+      <div className="flex flex-wrap gap-4 justify-start pr-17 pl-0">
         {favoriteQuests.map((quest) => (
-          <div key={quest.id} className="w-full max-w-sm">
+          <div key={quest.id} className="w-80">
             <QuestBlock
               quest={quest}
               user={user}

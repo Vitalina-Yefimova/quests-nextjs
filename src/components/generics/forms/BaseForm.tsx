@@ -131,7 +131,6 @@ export default function BaseForm<T = any>({
               onClick={(e) => {
                 if (disabled) {
                   e.preventDefault();
-                  alert("You can't change verified email");
                 }
               }}
             >
@@ -208,7 +207,7 @@ export default function BaseForm<T = any>({
       )}
 
       {showTermsCheckbox && (
-        <div className="flex items-start space-x-2 pt-3">
+        <div className="flex items-start space-x-2">
           <input
             type="checkbox"
             id="terms"
@@ -234,7 +233,7 @@ export default function BaseForm<T = any>({
 
       <Button
         type="submit"
-        className={`w-[219px] h-[47px] p-3 mt-5 rounded-[47px] font-extrabold text-sm leading-[0.42px] mx-auto block ${
+        className={`w-[219px] h-[47px] p-3 mt-3 rounded-[47px] font-extrabold text-sm leading-[0.42px] mx-auto block ${
           (!showTermsCheckbox || isChecked) && !isSuccess
             ? "bg-[#F28A0F] text-white cursor-none"
             : "bg-[#B8B8B8] text-white cursor-none"

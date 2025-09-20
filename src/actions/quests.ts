@@ -13,7 +13,6 @@ export const getAllQuests = async (): Promise<Quest[]> => {
     }
     return response.json();
   } catch (error) {
-    console.error('Error in getAllQuests:', error);
     throw error;
   }
 };
@@ -28,7 +27,6 @@ export const getQuestById = async (id: string): Promise<Quest> => {
     }
     return response.json();
   } catch (error) {
-    console.error('Error in getQuestById:', error);
     throw error;
   }
 };

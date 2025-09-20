@@ -6,6 +6,8 @@ import PersonIcon from '@/components/icons/PersonIcon';
 import PuzzleIcon from '@/components/icons/PuzzleIcon';
 import DividerVector from '@/components/generics/divider/DividerVector';
 import FavoritesToggle from '@/components/generics/favorites/FavoritesToggle';
+import CustomCursorWrapper from '@/components/generics/customCursor/CustomCursorWrapper';
+import Link from 'next/link';
 
 interface QuestPageProps {
   params: Promise<{
@@ -93,9 +95,27 @@ export default async function QuestPage({ params }: QuestPageProps) {
           {quest?.description}
         </p>
 
-        <button className="flex items-center justify-center w-[200px] h-[60px] bg-[#F28A0F] text-white text-[17px] font-semibold not-italic leading-normal tracking-[0.51px] rounded-full ml-[30px] cursor-none">
-          Book Now
-        </button>
+        <div className="ml-[30px]">
+          {user ? (
+            <CustomCursorWrapper>
+              <Link
+                href={`/quest/${quest.id}/order`}
+                className="flex items-center justify-center w-[200px] h-[60px] bg-[#F28A0F] text-white text-[17px] font-semibold not-italic leading-normal tracking-[0.51px] rounded-full cursor-none hover:bg-[#E07A0E] transition-colors"
+              >
+                Order Now
+              </Link>
+            </CustomCursorWrapper>
+          ) : (
+            <CustomCursorWrapper>
+              <Link
+                href="/auth"
+                className="flex items-center justify-center w-[210px] h-[60px] bg-[#F28A0F] text-white text-[14px] font-extrabold not-italic leading-normal tracking-[0.51px] rounded-full cursor-none hover:bg-[#E07A0E] transition-colors"
+              >
+                Log in to order this quest
+              </Link>
+            </CustomCursorWrapper>
+          )}
+        </div>
         </div>
       </div>
     </div>

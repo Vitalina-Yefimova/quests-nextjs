@@ -60,9 +60,10 @@ export const emailAuth = async (
 
 export const verifyEmail = async (token: string) => {
   try {
-    const response = await fetch(`${process.env.API_BASE_URL}/auth/verify?token=${token}`, {
-      method: 'GET',
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/verify`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
     });
 
     if (!response.ok) {
@@ -83,7 +84,6 @@ export const logout = async (): Promise<void> => {
   try {
     await removeAuthToken();
   } catch (error) {
-    console.error('Error in logout:', error);
     throw error;
   }
 };

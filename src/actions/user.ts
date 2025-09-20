@@ -24,7 +24,6 @@ export const getUser = async (): Promise<User | null> => {
     }
     return response.json();
   } catch (error) {
-    console.error('Error in getUser:', error);
     return null;
   }
 };
@@ -45,7 +44,6 @@ export const updateUser = async (
       profileData.email = userData.email;
     }
 
-    const validatedData = profileEditSchema.parse(profileData);
     const token = await getAuthToken();
 
     if (!token) {
@@ -72,7 +70,6 @@ export const updateUser = async (
     const updatedUser = await response.json();
     return { success: true, user: updatedUser };
   } catch (error) {
-    console.error('Error in updateUser:', error);
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }
@@ -109,7 +106,6 @@ export const changePassword = async (data: ChangePasswordFormValues) => {
 
     return { success: true };
   } catch (error) {
-    console.error('Error in changePassword:', error);
     if (error instanceof Error) {
       return { success: false, error: error.message };
     }

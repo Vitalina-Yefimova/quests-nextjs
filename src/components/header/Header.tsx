@@ -73,7 +73,14 @@ export default function Header({ className = "" }: { className?: string }) {
             ) : (
               <CustomCursorWrapper>
                 <button
-                  onClick={() => setShowAuthPopup(true)}
+                  onClick={() => {
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('auth', 'login');
+                    newUrl.searchParams.set('type', 'login');
+                    newUrl.searchParams.set('method', 'phone');
+                    window.history.replaceState({}, '', newUrl.toString());
+                    setShowAuthPopup(true);
+                  }}
                   className="text-white text-sm bg-[#F28A0F] transition px-5 py-2 rounded-md cursor-none inline-flex items-center"
                 >
                   <UserIcon size={18} className="inline mr-2" />
@@ -87,8 +94,20 @@ export default function Header({ className = "" }: { className?: string }) {
       
       {showAuthPopup && (
         <AuthPopup 
-          onClose={() => setShowAuthPopup(false)} 
+          onClose={() => {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('auth');
+            newUrl.searchParams.delete('type');
+            newUrl.searchParams.delete('method');
+            window.history.replaceState({}, '', newUrl.toString());
+            setShowAuthPopup(false);
+          }} 
           onLoginSuccess={() => {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('auth');
+            newUrl.searchParams.delete('type');
+            newUrl.searchParams.delete('method');
+            window.history.replaceState({}, '', newUrl.toString());
             setShowAuthPopup(false);
             const checkAuth = async () => {
               const user = await getUser();
@@ -96,6 +115,7 @@ export default function Header({ className = "" }: { className?: string }) {
             };
             checkAuth();
           }}
+          useUrlParams={true}
         />
       )}
     </>
