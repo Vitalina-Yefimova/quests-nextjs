@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { COOKIE_NAMES } from '@/utils/tokens';
+import { OrderStatus } from '@/utils/interfaces';
 
 export interface Order {
   id: number;
@@ -10,7 +11,15 @@ export interface Order {
   date: string;
   participants: number;
   price: number;
+  status: OrderStatus;
   createdAt: string;
+  updatedAt: string;
+  quest?: {
+    players: {
+      min: number;
+      max: number;
+    };
+  };
 }
 
 export interface CreateOrderData {

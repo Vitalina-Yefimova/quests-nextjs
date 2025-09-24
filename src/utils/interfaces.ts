@@ -27,4 +27,10 @@ export interface Quest {
   price: string;
 }
 
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  CANCELLED = 'CANCELLED'
+}
+
 

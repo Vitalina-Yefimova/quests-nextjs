@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getOrders, updateOrder, deleteOrder, Order } from "@/actions/orders";
+import { OrderStatus } from "@/utils/interfaces";
 import Link from "next/link";
 
 export default function OrdersSection() {
@@ -10,9 +11,26 @@ export default function OrdersSection() {
   const [error, setError] = useState<string | null>(null);
   const [editOrderId, setEditOrderId] = useState<number | null>(null);
   const [editDate, setEditDate] = useState("");
-  const [editParticipants, setEditParticipants] = useState(1);
+  const [editParticipants, setEditParticipants] = useState("1");
   const [editError, setEditError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const statusConfig = {
+    [OrderStatus.PENDING]: { color: "text-yellow-400", text: "Pending" },
+    [OrderStatus.CONFIRMED]: { color: "text-green-400", text: "Confirmed" },
+    [OrderStatus.CANCELLED]: { color: "text-red-400", text: "Cancelled" }
+  };
+
+  const getStatusColor = (status: OrderStatus) => statusConfig[status]?.color || "text-gray-400";
+  const getStatusText = (status: OrderStatus) => statusConfig[status]?.text || "Unknown";
+
+  const canEditOrder = (order: Order) => {
+    return order.status !== OrderStatus.CANCELLED;
+  };
+
+  const canCancelOrder = (order: Order) => {
+    return order.status !== OrderStatus.CANCELLED;
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -28,69 +46,67 @@ export default function OrdersSection() {
   }, []);
 
   const handleEdit = (order: Order) => {
+    if (!canEditOrder(order)) {
+      setEditError("Cannot edit cancelled order.");
+      return;
+    }
     setEditOrderId(order.id);
     setEditDate(order.date.split("T")[0]);
-    setEditParticipants(order.participants);
+    setEditParticipants(order.participants.toString());
     setEditError(null);
   };
 
   const handleCancelEdit = () => {
     setEditOrderId(null);
     setEditDate("");
-    setEditParticipants(1);
+    setEditParticipants("1");
     setEditError(null);
   };
 
   const handleSaveEdit = async (id: number) => {
     setEditError(null);
-    const now = new Date();
-    const questDate = new Date(editDate);
-    const diffInDays = Math.ceil(
-      (questDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    );
 
-    if (diffInDays < 7) {
-      setEditError(
-        "Date cannot be changed less than 7 days before the quest."
-      );
+    const participantsNum = parseInt(editParticipants, 10);
+    if (isNaN(participantsNum) || participantsNum < 1) {
+ 
       return;
     }
 
     const result = await updateOrder(id, {
       date: editDate,
-      participants: editParticipants,
+      participants: participantsNum,
     });
 
     if (result.success) {
       setOrders((prev) =>
         prev.map((order) =>
           order.id === id
-            ? { ...order, date: editDate, participants: editParticipants }
+            ? { ...order, date: editDate, participants: participantsNum }
             : order
         )
       );
       handleCancelEdit();
     } else {
-      setEditError(result.error || "Failed to update order.");
+      let errorMessage = result.error || "Failed to update order.";
+      
+      try {
+        const errorMatch = errorMessage.match(/\{"message":"([^"]+)"/);
+        if (errorMatch) {
+          errorMessage = errorMatch[1];
+        }
+      } catch (e) {
+      }
+      
+      setEditError(errorMessage);
     }
   };
 
-  const handleDelete = async (id: number, date: string) => {
+  const handleDelete = async (order: Order) => {
     setDeleteError(null);
-    const now = new Date();
-    const questDate = new Date(date);
-    const diffInDays = Math.ceil(
-      (questDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    );
 
-    if (diffInDays < 7) {
-      setDeleteError("Cannot cancel less than 7 days before the quest date.");
-      return;
-    }
-
-    const result = await deleteOrder(id);
+    const result = await deleteOrder(order.id);
     if (result.success) {
-      setOrders((prev) => prev.filter((order) => order.id !== id));
+      setOrders((prev) => prev.filter((orderItem) => orderItem.id !== order.id));
     } else {
       setDeleteError(result.error || "Failed to cancel order.");
     }
@@ -123,12 +139,12 @@ export default function OrdersSection() {
               <label className="text-sm block">Participants</label>
               <input
                 type="number"
-                min={1}
-                max={8}
+                min={orders.find(order => order.id === editOrderId)?.quest?.players?.min}
+                max={orders.find(order => order.id === editOrderId)?.quest?.players?.max}
                 value={editParticipants}
-                onChange={(e) =>
-                  setEditParticipants(Math.max(1, Number(e.target.value)))
-                }
+                onChange={(e) => {
+                  setEditParticipants(e.target.value);
+                }}
                 className="bg-gray-800 text-white p-2 rounded w-full"
               />
               <p className="text-red-500 text-sm min-h-[20px]">
@@ -157,27 +173,47 @@ export default function OrdersSection() {
               >
                 {order.questTitle}
               </Link>
-              <p className="pt-5">
+              <div className="pt-3">
+                <p className="text-sm font-medium text-gray-300">
+                  Status: <span className={getStatusColor(order.status)}>{getStatusText(order.status)}</span>
+                </p>
+              </div>
+              <p className="pt-2">
                 Date: {new Date(order.date).toLocaleDateString()}
               </p>
               <p>Participants: {order.participants}</p>
               <p>Price: ${order.price}</p>
-              <p className="text-xs text-gray-400 pt-6">
-                Created at: {new Date(order.createdAt).toLocaleString()}
+              <p className="text-xs text-gray-400 pt-4">
+                Created: {new Date(order.createdAt).toLocaleString()}
               </p>
+              {order.updatedAt !== order.createdAt && (
+                <p className="text-xs text-gray-400">
+                  Updated: {new Date(order.updatedAt).toLocaleString()}
+                </p>
+              )}
               {deleteError && (
                 <p className="text-red-500 text-sm mt-1">{deleteError}</p>
               )}
-              <div className="flex gap-2 pt-32 justify-between">
+              <div className="flex gap-2 pt-6 justify-between">
                 <button
                   onClick={() => handleEdit(order)}
-                  className="px-9 py-1 bg-orange-500 rounded text-sm"
+                  disabled={!canEditOrder(order)}
+                  className={`px-9 py-1 rounded text-sm ${
+                    canEditOrder(order)
+                      ? "bg-orange-500 hover:bg-orange-600"
+                      : "bg-gray-500 cursor-not-allowed"
+                  }`}
                 >
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(order.id, order.date)}
-                  className="px-6 py-1 bg-red-600 rounded text-sm"
+                  onClick={() => handleDelete(order)}
+                  disabled={!canCancelOrder(order)}
+                  className={`px-6 py-1 rounded text-sm ${
+                    canCancelOrder(order)
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-gray-500 cursor-not-allowed"
+                  }`}
                 >
                   Cancel
                 </button>
